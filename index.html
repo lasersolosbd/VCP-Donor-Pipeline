@@ -787,7 +787,7 @@
   const AIRTABLE_BASE = 'app3P0M65GLJgIe7q';
   const AIRTABLE_TABLE= 'tbl3Hgl2prPisMSpj';
   // Airtable Personal Access Token — set this in your environment / Vercel env vars
-  const AIRTABLE_PAT  = window.AIRTABLE_PAT || 'YOUR_AIRTABLE_PAT_HERE';
+  const AIRTABLE_PAT = window._env?.AIRTABLE_PAT || '';
 
   // Field IDs from VCP_Pipeline_Runs
   const FIELDS = {
