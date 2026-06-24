@@ -23,14 +23,14 @@ export default async function handler(req, res) {
 
     const text = await n8nResponse.text();
     let data;
-    try {
-      data = JSON.parse(text);
-    } catch {
-      data = { message: text };
-    }
+    try { data = JSON.parse(text); }
+    catch { data = { message: text }; }
 
     return res.status(n8nResponse.status).json(data);
   } catch (err) {
-    return res.status(500).json({ error: 'Failed to reach n8n', detail: err.message });
+    return res.status(500).json({
+      error: 'Failed to reach n8n',
+      detail: err.message
+    });
   }
 }
