@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RapportRadar — VCP Donor Discovery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0B0F1A;
+      --surface:      #131929;
+      --surface-hi:   #1A2335;
+      --border:       #1E2D45;
+      --border-hi:    #2B4070;
+      --accent:       #2B6CB0;
+      --accent-hi:    #4A9EE8;
+      --success:      #22C55E;
+      --warning:      #F59E0B;
+      --danger:       #EF4444;
+      --text:         #F0F4FF;
+      --text-muted:   #6B7FA3;
+      --text-dim:     #3D5070;
+      --radius:       8px;
+      --font-ui:      'Space Grotesk', sans-serif;
+      --font-body:    'Inter', sans-serif;
+    }
+
+    html { font-size: 16px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ── HEADER ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 100;
+    }
+    .logo {
+      font-family: var(--font-ui);
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-hi);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .logo-mark::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--accent-hi);
+      border-radius: 50%;
+    }
+    .logo-sub {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 13px;
+    }
+    .header-badge {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* ── MAIN LAYOUT ── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 32px 64px;
+    }
+
+    .console-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 900px) {
+      .console-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-title {
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .card-body { padding: 20px; }
+
+    /* ── FORM ELEMENTS ── */
+    .field { margin-bottom: 20px; }
+    .field:last-child { margin-bottom: 0; }
+    label {
+      display: block;
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    select, input[type="text"] {
+      width: 100%;
+      background: var(--surface-hi);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 14px;
+      padding: 10px 14px;
+      appearance: none;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    select:focus, input[type="text"]:focus {
+      border-color: var(--accent-hi);
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7FA3' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+    select option { background: #1A2335; }
+
+    /* keyword chips */
+    .keyword-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 8px;
+      max-height: 260px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .keyword-grid::-webkit-scrollbar { width: 4px; }
+    .keyword-grid::-webkit-scrollbar-track { background: transparent; }
+    .keyword-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .kw-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--surface-hi);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.12s, background 0.12s;
+      user-select: none;
+    }
+    .kw-chip:hover { border-color: var(--border-hi); }
+    .kw-chip.selected {
+      border-color: var(--accent-hi);
+      background: rgba(74, 158, 232, 0.08);
+    }
+    .kw-chip input[type="checkbox"] { display: none; }
+    .kw-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1.5px solid var(--text-dim);
+      flex-shrink: 0;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .kw-chip.selected .kw-dot {
+      background: var(--accent-hi);
+      border-color: var(--accent-hi);
+    }
+    .kw-label {
+      font-family: var(--font-ui);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+    .kw-chip.selected .kw-label { color: var(--text); }
+
+    .kw-category {
+      grid-column: 1 / -1;
+      font-family: var(--font-ui);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 8px 0 2px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+
+    /* result count slider */
+    .count-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .count-opt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 8px;
+      background: var(--surface-hi);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.12s, background 0.12s;
+      user-select: none;
+    }
+    .count-opt.selected {
+      border-color: var(--accent-hi);
+      background: rgba(74, 158, 232, 0.08);
+    }
+    .count-opt input { display: none; }
+    .count-num {
+      font-family: var(--font-ui);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .count-cost {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .count-opt.selected .count-cost { color: var(--accent-hi); }
+
+    /* submit button */
+    .btn-run {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 24px;
+    }
+    .btn-run:hover:not(:disabled) { background: var(--accent-hi); }
+    .btn-run:active:not(:disabled) { transform: scale(0.99); }
+    .btn-run:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ── STATUS PANEL ── */
+    .status-idle, .status-running, .status-complete, .status-error {
+      display: none;
+    }
+    .status-idle.active, .status-running.active,
+    .status-complete.active, .status-error.active {
+      display: block;
+    }
+
+    /* radar pulse — the signature element */
+    .radar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 20px;
+      gap: 20px;
+    }
+    .radar {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .radar-core {
+      width: 20px;
+      height: 20px;
+      background: var(--warning);
+      border-radius: 50%;
+      position: relative;
+      z-index: 2;
+    }
+    .radar-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1.5px solid var(--warning);
+      animation: radar-pulse 2s ease-out infinite;
+      opacity: 0;
+    }
+    .radar-ring:nth-child(2) { animation-delay: 0s; }
+    .radar-ring:nth-child(3) { animation-delay: 0.6s; }
+    .radar-ring:nth-child(4) { animation-delay: 1.2s; }
+
+    @keyframes radar-pulse {
+      0%   { width: 20px; height: 20px; opacity: 0.8; }
+      100% { width: 80px; height: 80px; opacity: 0; }
+    }
+
+    .radar-label {
+      font-family: var(--font-ui);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--warning);
+      text-align: center;
+    }
+    .radar-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    /* idle state */
+    .idle-wrap {
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .idle-icon {
+      width: 48px;
+      height: 48px;
+      border: 1.5px solid var(--border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .idle-icon svg { opacity: 0.3; }
+    .idle-text {
+      font-family: var(--font-ui);
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* complete state */
+    .complete-wrap {
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .tier-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .tier-chip {
+      background: var(--surface-hi);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .tier-chip.major { border-color: rgba(34, 197, 94, 0.4); }
+    .tier-chip.mid   { border-color: rgba(74, 158, 232, 0.4); }
+    .tier-chip.emerging { border-color: rgba(245, 158, 11, 0.3); }
+    .tier-chip.exclude  { border-color: rgba(107, 127, 163, 0.2); }
+    .tier-count {
+      font-family: var(--font-ui);
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .tier-chip.major .tier-count   { color: #22C55E; }
+    .tier-chip.mid .tier-count     { color: #4A9EE8; }
+    .tier-chip.emerging .tier-count { color: #F59E0B; }
+    .tier-chip.exclude .tier-count  { color: var(--text-muted); }
+    .tier-name {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .exclude-rate {
+      font-family: var(--font-ui);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .exclude-rate span { color: var(--text); font-weight: 600; }
+
+    .btn-download {
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid var(--success);
+      border-radius: var(--radius);
+      color: var(--success);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-download:hover { background: rgba(34, 197, 94, 0.08); }
+    .btn-download:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-new-run {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-new-run:hover { border-color: var(--border-hi); color: var(--text); }
+
+    /* error state */
+    .error-wrap {
+      padding: 32px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+    }
+    .error-icon {
+      font-size: 32px;
+    }
+    .error-msg {
+      font-size: 13px;
+      color: var(--danger);
+      font-family: var(--font-ui);
+    }
+    .error-detail {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+    }
+
+    /* ── RUN HISTORY ── */
+    .section-label {
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .history-table th {
+      font-family: var(--font-ui);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-align: left;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .history-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      vertical-align: middle;
+    }
+    .history-table tr:last-child td { border-bottom: none; }
+    .history-table tr:hover td { background: var(--surface-hi); }
+    .history-table .td-label {
+      color: var(--text);
+      font-family: var(--font-ui);
+      font-weight: 500;
+    }
+
+    .tier-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-family: var(--font-ui);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .pill-major   { background: rgba(34,197,94,0.12);  color: #22C55E; }
+    .pill-mid     { background: rgba(74,158,232,0.12); color: #4A9EE8; }
+    .pill-emerging{ background: rgba(245,158,11,0.12); color: #F59E0B; }
+
+    .cache-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-family: var(--font-ui);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      background: rgba(107,127,163,0.12);
+      color: var(--text-dim);
+    }
+    .cache-badge.live {
+      background: rgba(34,197,94,0.1);
+      color: var(--success);
+    }
+
+    .history-empty {
+      padding: 40px;
+      text-align: center;
+      color: var(--text-dim);
+      font-family: var(--font-ui);
+      font-size: 13px;
+    }
+
+    .loading-row td {
+      text-align: center;
+      color: var(--text-dim);
+      font-family: var(--font-ui);
+      font-size: 12px;
+      padding: 24px;
+    }
+
+    /* ── MISC ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .radar-ring { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark"></div>
+    RapportRadar™
+    <span class="logo-sub">/ Donor Discovery</span>
+  </div>
+  <div class="header-badge">Kind Logic Group</div>
+</header>
+
+<main>
+  <div class="console-grid">
+
+    <!-- LEFT: Configuration -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Run Configuration</span>
+      </div>
+      <div class="card-body">
+
+        <div class="field">
+          <label>Location</label>
+          <select id="location">
+            <option value="vcp_longmont">Longmont, CO</option>
+            <option value="vcp_kansas_city">Kansas City, MO</option>
+            <option value="vcp_st_louis">St. Louis, MO</option>
+            <option value="vcp_sioux_falls">Sioux Falls, SD</option>
+            <option value="vcp_milwaukee">Milwaukee, WI</option>
+            <option value="vcp_phoenix">Glendale / Phoenix, AZ</option>
+            <option value="vcp_dallas">Dallas, TX</option>
+            <option value="vcp_national">National (No Geo Filter)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Campaign Name</label>
+          <input type="text" id="campaign" value="VCP" placeholder="e.g. VCP Q3 2026" />
+        </div>
+
+        <div class="field">
+          <label>Keywords — select signals to target</label>
+          <div class="keyword-grid" id="keyword-grid">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Result Count</label>
+          <div class="count-row">
+            <label class="count-opt selected" id="count-25">
+              <input type="radio" name="count" value="25" checked />
+              <span class="count-num">25</span>
+              <span class="count-cost">~$7</span>
+            </label>
+            <label class="count-opt" id="count-50">
+              <input type="radio" name="count" value="50" />
+              <span class="count-num">50</span>
+              <span class="count-cost">~$14</span>
+            </label>
+            <label class="count-opt" id="count-75">
+              <input type="radio" name="count" value="75" />
+              <span class="count-num">75</span>
+              <span class="count-cost">~$21</span>
+            </label>
+            <label class="count-opt" id="count-100">
+              <input type="radio" name="count" value="100" />
+              <span class="count-num">100</span>
+              <span class="count-cost">~$28</span>
+            </label>
+          </div>
+        </div>
+
+        <button class="btn-run" id="btn-run" onclick="startRun()">
+          Run Prospect Discovery
+        </button>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: Status -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Run Status</span>
+      </div>
+
+      <!-- IDLE -->
+      <div class="status-idle active" id="state-idle">
+        <div class="idle-wrap">
+          <div class="idle-icon">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="9" stroke="#6B7FA3" stroke-width="1.5"/>
+              <path d="M12 7v5l3 3" stroke="#6B7FA3" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="idle-text">Configure a run on the left<br/>and press <strong>Run Prospect Discovery</strong>.</p>
+        </div>
+      </div>
+
+      <!-- RUNNING -->
+      <div class="status-running" id="state-running">
+        <div class="radar-wrap">
+          <div class="radar">
+            <div class="radar-ring"></div>
+            <div class="radar-ring"></div>
+            <div class="radar-ring"></div>
+            <div class="radar-core"></div>
+          </div>
+          <div>
+            <p class="radar-label">Scanning prospects...</p>
+            <p class="radar-sub" id="running-sub">Querying Nyne.ai — this takes 30–90 seconds</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPLETE -->
+      <div class="status-complete" id="state-complete">
+        <div class="complete-wrap">
+          <div class="tier-row">
+            <div class="tier-chip major">
+              <span class="tier-count" id="res-major">—</span>
+              <span class="tier-name">Major</span>
+            </div>
+            <div class="tier-chip mid">
+              <span class="tier-count" id="res-mid">—</span>
+              <span class="tier-name">Mid</span>
+            </div>
+            <div class="tier-chip emerging">
+              <span class="tier-count" id="res-emerging">—</span>
+              <span class="tier-name">Emerging</span>
+            </div>
+            <div class="tier-chip exclude">
+              <span class="tier-count" id="res-exclude">—</span>
+              <span class="tier-name">Exclude</span>
+            </div>
+          </div>
+          <p class="exclude-rate" id="res-exclude-rate"></p>
+          <div class="divider" style="margin: 4px 0;"></div>
+          <button class="btn-download" id="btn-download" onclick="downloadExcel()" disabled>
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24">
+              <path d="M12 3v13M5 16l7 7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Download Excel Report
+          </button>
+          <button class="btn-new-run" onclick="resetForm()">Start New Run</button>
+        </div>
+      </div>
+
+      <!-- ERROR -->
+      <div class="status-error" id="state-error">
+        <div class="error-wrap">
+          <div class="error-icon">⚠</div>
+          <p class="error-msg" id="error-msg">Something went wrong.</p>
+          <p class="error-detail" id="error-detail"></p>
+          <button class="btn-new-run" style="margin-top:8px;" onclick="resetForm()">Try Again</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RUN HISTORY -->
+  <div class="section-label">Recent Runs</div>
+  <div class="card">
+    <table class="history-table" id="history-table">
+      <thead>
+        <tr>
+          <th>Run</th>
+          <th>Location</th>
+          <th>Keywords</th>
+          <th>Results</th>
+          <th>Exclude Rate</th>
+          <th>Cache</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="history-body">
+        <tr class="loading-row"><td colspan="7">Loading run history...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<script>
+  // ── CONFIG ────────────────────────────────────────────────────────────────
+  const WEBHOOK_URL   = 'https://solobusinessdude.app.n8n.cloud/webhook/vcp-donor-discovery';
+  const AIRTABLE_BASE = 'app3P0M65GLJgIe7q';
+  const AIRTABLE_TABLE= 'tbl3Hgl2prPisMSpj';
+  // Airtable Personal Access Token — set this in your environment / Vercel env vars
+  const AIRTABLE_PAT  = window.AIRTABLE_PAT || 'YOUR_AIRTABLE_PAT_HERE';
+
+  // Field IDs from VCP_Pipeline_Runs
+  const FIELDS = {
+    runId:        'fldT7ry8x7CZV6OEQ',
+    runLabel:     'fldm8ojrJNdZ0kHBR',
+    status:       'fld2au653AEDuHOL3',
+    location:     'fldVkPkgShTX0FF4W',
+    campaign:     'fldxeXpWEdhZLtbrD',
+    keywords:     'fldRCEF8WaxDjI4cC',
+    totalReturned:'fldu7khQHOZKtvaHz',
+    majorCount:   'fldQEHdeD4NSJTnrl',
+    midCount:     'fldUqTlF6MW36Bgnf',
+    emergingCount:'fldPqdO4DmnjkISqE',
+    excludeCount: 'fldmHEDJNWgF8CEiA',
+    duplicateCount:'fldDf29HXe7xISC4h',
+    excludeRate:  'fldRosuKm4OLti8MG',
+    poolSize:     'fldnY8KCcntkvxtaA',
+    fromCache:    'fldgcMRSLkWlFGI8o',
+    startedAt:    'fldjC38d8SwJZo2A3'
+  };
+
+  // ── KEYWORDS ──────────────────────────────────────────────────────────────
+  const KEYWORD_CATEGORIES = [
+    {
+      label: 'Military & Veterans',
+      items: [
+        { value: 'veteran',          label: 'Veteran' },
+        { value: 'military',         label: 'Military' },
+        { value: 'armed_forces',     label: 'Armed Forces' },
+        { value: 'usaf',             label: 'Air Force' },
+        { value: 'us_army',          label: 'Army' },
+        { value: 'us_navy',          label: 'Navy' },
+        { value: 'us_marines',       label: 'Marines' },
+      ]
+    },
+    {
+      label: 'Philanthropic',
+      items: [
+        { value: 'philanthropist',   label: 'Philanthropist' },
+        { value: 'nonprofit_board',  label: 'Nonprofit Board' },
+        { value: 'charity',          label: 'Charitable Giving' },
+        { value: 'foundation',       label: 'Foundation' },
+        { value: 'community_leader', label: 'Community Leader' },
+      ]
+    },
+    {
+      label: 'Wealth & Capacity',
+      items: [
+        { value: 'ceo_executive',    label: 'CEO / Executive' },
+        { value: 'founder',          label: 'Founder' },
+        { value: 'entrepreneur',     label: 'Entrepreneur' },
+        { value: 'investor',         label: 'Investor' },
+        { value: 'real_estate',      label: 'Real Estate' },
+      ]
+    },
+    {
+      label: 'Mission Alignment',
+      items: [
+        { value: 'housing',          label: 'Housing' },
+        { value: 'homelessness',     label: 'Homelessness' },
+        { value: 'social_services',  label: 'Social Services' },
+        { value: 'community_impact', label: 'Community Impact' },
+        { value: 'faith_leader',     label: 'Faith Leader' },
+      ]
+    }
+  ];
+
+  // Render keyword chips
+  const kgEl = document.getElementById('keyword-grid');
+  const DEFAULT_SELECTED = new Set(['veteran', 'philanthropist', 'ceo_executive']);
+
+  KEYWORD_CATEGORIES.forEach(cat => {
+    const catEl = document.createElement('div');
+    catEl.className = 'kw-category';
+    catEl.textContent = cat.label;
+    kgEl.appendChild(catEl);
+
+    cat.items.forEach(kw => {
+      const chip = document.createElement('label');
+      chip.className = 'kw-chip' + (DEFAULT_SELECTED.has(kw.value) ? ' selected' : '');
+      chip.innerHTML = `
+        <input type="checkbox" value="${kw.value}" ${DEFAULT_SELECTED.has(kw.value) ? 'checked' : ''} />
+        <span class="kw-dot"></span>
+        <span class="kw-label">${kw.label}</span>`;
+      chip.addEventListener('change', () => {
+        chip.classList.toggle('selected', chip.querySelector('input').checked);
+      });
+      kgEl.appendChild(chip);
+    });
+  });
+
+  // Count options
+  document.querySelectorAll('.count-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.count-opt').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    });
+  });
+
+  // ── STATE ─────────────────────────────────────────────────────────────────
+  let currentRunData = null;
+
+  function setState(name) {
+    ['idle','running','complete','error'].forEach(s => {
+      document.getElementById('state-' + s).classList.toggle('active', s === name);
+    });
+  }
+
+  function resetForm() {
+    currentRunData = null;
+    setState('idle');
+    document.getElementById('btn-run').disabled = false;
+    document.getElementById('btn-run').textContent = 'Run Prospect Discovery';
+  }
+
+  // ── RUN ───────────────────────────────────────────────────────────────────
+  async function startRun() {
+    const location = document.getElementById('location').value;
+    const campaign = document.getElementById('campaign').value.trim() || 'VCP';
+    const keywords = [...document.querySelectorAll('#keyword-grid input:checked')].map(el => el.value);
+    const maxResults = parseInt(document.querySelector('input[name="count"]:checked').value);
+
+    if (keywords.length === 0) {
+      alert('Please select at least one keyword signal before running.');
+      return;
+    }
+
+    document.getElementById('btn-run').disabled = true;
+    document.getElementById('btn-run').textContent = 'Running...';
+    setState('running');
+
+    const stages = [
+      { delay: 5000,  msg: 'Querying Nyne.ai — searching ' + maxResults + ' prospects...' },
+      { delay: 20000, msg: 'Nyne processing — building identity graph...' },
+      { delay: 45000, msg: 'Sending to Claude for scoring and campaign plans...' },
+      { delay: 75000, msg: 'Writing results to Airtable...' },
+    ];
+    let stageIdx = 0;
+    const stageTimer = setInterval(() => {
+      if (stageIdx < stages.length) {
+        document.getElementById('running-sub').textContent = stages[stageIdx].msg;
+        stageIdx++;
+      }
+    }, stages[0].delay);
+
+    // Update stages on a simpler interval
+    let elapsed = 0;
+    const tickTimer = setInterval(() => {
+      elapsed += 5;
+      const stage = stages.find(s => elapsed * 1000 >= s.delay);
+      if (stage) document.getElementById('running-sub').textContent = stage.msg;
+    }, 5000);
+
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ location, keywords, max_results: maxResults, campaign })
+      });
+
+      clearInterval(stageTimer);
+      clearInterval(tickTimer);
+
+      if (!res.ok) throw new Error('Webhook returned ' + res.status);
+
+      // Fetch the latest Pipeline Run record to get counts
+      await new Promise(r => setTimeout(r, 2000)); // brief pause for Airtable to commit
+      const runData = await fetchLatestRun();
+      currentRunData = runData;
+
+      if (runData) {
+        document.getElementById('res-major').textContent    = runData.majorCount    ?? '—';
+        document.getElementById('res-mid').textContent      = runData.midCount      ?? '—';
+        document.getElementById('res-emerging').textContent = runData.emergingCount ?? '—';
+        document.getElementById('res-exclude').textContent  = runData.excludeCount  ?? '—';
+        const rate = runData.excludeRate != null
+          ? Math.round(runData.excludeRate * 100) + '%'
+          : '—';
+        document.getElementById('res-exclude-rate').innerHTML =
+          `EXCLUDE rate this run: <span>${rate}</span> &nbsp;·&nbsp; Pool size: <span>${runData.poolSize ?? '—'}</span>`;
+      }
+
+      document.getElementById('btn-download').disabled = false;
+      setState('complete');
+      loadHistory();
+
+    } catch (err) {
+      clearInterval(stageTimer);
+      clearInterval(tickTimer);
+      document.getElementById('error-msg').textContent = 'Run failed.';
+      document.getElementById('error-detail').textContent = err.message;
+      setState('error');
+      document.getElementById('btn-run').disabled = false;
+      document.getElementById('btn-run').textContent = 'Run Prospect Discovery';
+    }
+  }
+
+  // ── AIRTABLE FETCH ────────────────────────────────────────────────────────
+  async function fetchLatestRun() {
+    if (AIRTABLE_PAT === 'YOUR_AIRTABLE_PAT_HERE') return null;
+    try {
+      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}` +
+        `?sort[0][field]=${FIELDS.startedAt}&sort[0][direction]=desc&maxRecords=1`;
+      const res = await fetch(url, {
+        headers: { 'Authorization': 'Bearer ' + AIRTABLE_PAT }
+      });
+      const data = await res.json();
+      if (!data.records || data.records.length === 0) return null;
+      const f = data.records[0].fields;
+      return {
+        runLabel:     f[FIELDS.runLabel]      || '',
+        location:     f[FIELDS.location]      || '',
+        keywords:     f[FIELDS.keywords]      || '',
+        majorCount:   f[FIELDS.majorCount]    ?? null,
+        midCount:     f[FIELDS.midCount]      ?? null,
+        emergingCount:f[FIELDS.emergingCount] ?? null,
+        excludeCount: f[FIELDS.excludeCount]  ?? null,
+        excludeRate:  f[FIELDS.excludeRate]   ?? null,
+        poolSize:     f[FIELDS.poolSize]      ?? null,
+        fromCache:    f[FIELDS.fromCache]     || false,
+        startedAt:    f[FIELDS.startedAt]     || ''
+      };
+    } catch { return null; }
+  }
+
+  async function loadHistory() {
+    const tbody = document.getElementById('history-body');
+    if (AIRTABLE_PAT === 'YOUR_AIRTABLE_PAT_HERE') {
+      tbody.innerHTML = `<tr class="loading-row"><td colspan="7">Add your Airtable PAT to see run history.</td></tr>`;
+      return;
+    }
+    try {
+      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/${AIRTABLE_TABLE}` +
+        `?sort[0][field]=${FIELDS.startedAt}&sort[0][direction]=desc&maxRecords=5`;
+      const res = await fetch(url, {
+        headers: { 'Authorization': 'Bearer ' + AIRTABLE_PAT }
+      });
+      const data = await res.json();
+      if (!data.records || data.records.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="history-empty">No runs yet. Start your first run above.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.records.map(rec => {
+        const f = rec.fields;
+        const major    = f[FIELDS.majorCount]    ?? '—';
+        const mid      = f[FIELDS.midCount]      ?? '—';
+        const emerging = f[FIELDS.emergingCount] ?? '—';
+        const exclude  = f[FIELDS.excludeCount]  ?? '—';
+        const total    = f[FIELDS.totalReturned] ?? '—';
+        const rate     = f[FIELDS.excludeRate]   != null
+          ? Math.round(f[FIELDS.excludeRate] * 100) + '%' : '—';
+        const cache    = f[FIELDS.fromCache];
+        const dt       = f[FIELDS.startedAt]
+          ? new Date(f[FIELDS.startedAt]).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+          : '—';
+        const kw = (f[FIELDS.keywords] || '').split(',').slice(0, 3).join(', ');
+
+        return `<tr>
+          <td class="td-label">${f[FIELDS.runLabel] || f[FIELDS.runId] || '—'}</td>
+          <td>${f[FIELDS.location] || '—'}</td>
+          <td style="color:var(--text-muted); max-width:180px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${kw || '—'}</td>
+          <td>
+            <span class="tier-pill pill-major">${major} M</span>
+            <span class="tier-pill pill-mid">${mid} Mi</span>
+            <span class="tier-pill pill-emerging">${emerging} E</span>
+            <span style="color:var(--text-dim); font-size:11px; margin-left:4px;">${exclude} ex</span>
+          </td>
+          <td style="font-family:var(--font-ui); font-size:12px;">${rate}</td>
+          <td><span class="cache-badge ${cache ? '' : 'live'}">${cache ? 'Cached' : 'Live'}</span></td>
+          <td style="font-size:12px;">${dt}</td>
+        </tr>`;
+      }).join('');
+    } catch (err) {
+      tbody.innerHTML = `<tr class="loading-row"><td colspan="7">Could not load history: ${err.message}</td></tr>`;
+    }
+  }
+
+  // ── EXCEL DOWNLOAD ────────────────────────────────────────────────────────
+  async function downloadExcel() {
+    if (AIRTABLE_PAT === 'YOUR_AIRTABLE_PAT_HERE') {
+      alert('Add your Airtable PAT to enable Excel download.');
+      return;
+    }
+    const btn = document.getElementById('btn-download');
+    btn.disabled = true;
+    btn.textContent = 'Building report...';
+
+    try {
+      // Fetch latest 50 prospect records from VCP_Donor_Prospects
+      const url = `https://api.airtable.com/v0/${AIRTABLE_BASE}/tblfWLMrHwLHSZaLE` +
+        `?sort[0][field]=Score&sort[0][direction]=desc&maxRecords=50` +
+        `&filterByFormula=NOT({Tier}='EXCLUDE')`;
+      const res = await fetch(url, {
+        headers: { 'Authorization': 'Bearer ' + AIRTABLE_PAT }
+      });
+      const data = await res.json();
+      if (!data.records) throw new Error('No records returned');
+
+      // Build CSV (Excel-compatible)
+      const headers = ['Name','Tier','Score','Reasoning','First Channel',
+                       'Veterans Affinity','Capacity Signal','LinkedIn URL',
+                       'Email','Phone Available','Status','Discovery Date'];
+      const rows = data.records.map(r => {
+        const f = r.fields;
+        return headers.map(h => {
+          const val = f[h] != null ? String(f[h]) : '';
+          return '"' + val.replace(/"/g, '""') + '"';
+        }).join(',');
+      });
+
+      const csv = [headers.map(h => `"${h}"`).join(','), ...rows].join('\n');
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url2 = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url2;
+      const date = new Date().toISOString().split('T')[0];
+      a.download = `VCP_Prospects_${date}.csv`;
+      a.click();
+      URL.revokeObjectURL(url2);
+
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 3v13M5 16l7 7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Download Excel Report`;
+    } catch (err) {
+      alert('Download failed: ' + err.message);
+      btn.disabled = false;
+      btn.textContent = 'Download Excel Report';
+    }
+  }
+
+  // ── INIT ──────────────────────────────────────────────────────────────────
+  loadHistory();
+</script>
+</body>
+</html>
